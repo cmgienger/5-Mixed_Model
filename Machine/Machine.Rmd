@@ -25,13 +25,13 @@ data$person <- as.factor(data$person) #make person ID a factor
 ```{r plot individual across machines}
 p1<- ggplot(data, aes(x=machine, y=rating, group=person, color=person, shape=person)) + 
   geom_point(size=4, position = position_dodge2(width=.33, preserve = "total")) +
-  geom_line()+
+  scale_y_continuous(labels=scales::dollar_format()) +
+  #geom_line() +
+  geom_smooth(method = "lm", se = FALSE) +
   labs(title="The Bandit Gives Back: Rating Popular Slot Machines", x= "Slot Machine", y = "Machine Rating (yield/$100 played)")
 
   p1
 ```
-
-
 ```{r summarize data and plot, message=FALSE}
 machines_means <- data %>%
   group_by(machine) %>%
@@ -39,8 +39,6 @@ machines_means <- data %>%
             se_rating=sd(rating)/sqrt(n()))
 machines_means
 ```
-
-
 ```{r}
 mixed_machine <- lmer(rating~(machine*person)+(1|person), data = data)
 
@@ -50,7 +48,7 @@ anova(mixed_machine) #notice it doesn't report whether whole model is significan
 summary(mixed_machine)
 ```
 ```{r check model, fig.width=9.5, fig.height=9}
-check_model(mixed_machine)
+performance::check_model(mixed_machine)
 ```
 ```{r fit emmeans from model - each machine}
 #calculate model-adjusted means (e.g. estimated marginal means)
@@ -66,8 +64,7 @@ emmeans(mixed_machine, "machine", "person") #reverse the order of factors for al
 ```{r fit emmeans from model - each person*machine [alternate format]}
 emmeans(mixed_machine, "person", "machine")
 ```
-
-
+OK, so lets look at the raw means vs. model-adjusted means (esimated marginal means)
 ```{r emmeans as dataframe for use in plotting}
 data_emm <- as.data.frame(mixed_machine_emm)
 data_emm

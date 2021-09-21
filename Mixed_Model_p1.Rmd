@@ -57,7 +57,7 @@ We expect to generalize the results obtained with a random variable to all other
 
 **Part One**  
 **Repeated Measures Example**  
-One of the main assumptions of a traditional regression model is that collected samples are independent. What about a design where you measure the same replicates more than once, like a before-after comparison? Observations are obviously not independent. 
+One of the main assumptions of a traditional OLS regression model is that collected samples are independent. What about a design where you measure the same replicates more than once, like a before-after comparison? Observations are obviously not independent. 
 ```{r}
 treat  = rep(c('treat', 'control'), e=5)
 pre = c(20,10,60,20,10,50,10,40,20,10)
@@ -80,7 +80,7 @@ lm1 <- lm(score ~ treat + time + treat*time, data=dflong)
 anova(lm1)
 ```
 **THIS IS WHAT NOT TO DO! This model has ONLY Fixed Effects.**  
-This model is fit using only fixed effects, producing WAY too many residual df. Does not account for the hierarchical nature of the nature; individuals are tested multiple times in each treatment. Number of individuals was only n=10, so this model has artifically inflated sample size. This analysis can't possibly be correct.
+This model is fit using only fixed effects, producing WAY too many residual df. Does not account for the hierarchical nature of the experiment; individuals are tested multiple times in each treatment. Number of individuals was only n=10, so this model has artificially inflated sample size. This analysis can't possibly be correct.
 ```{r fit mixed model}
 lmeModel <- lmer(score ~ treat*time + (1|id), data=dflong)
 anova(lmeModel)
@@ -88,7 +88,7 @@ anova(lmeModel)
 ```
 However, now we are using a tool that can handle additional time points, continuous covariates with possibly nonlinear relationships, different types of outcome variables, other correlational structures among the observations, etc. In fact, if one looks at the help file for `aov`, one will note that it suggests using `lme` for unbalanced designs and other situations.  
 
-The slot machine example "Machine" is an example (in this repository)of a mixed-model with unbalanced sample sizes. 
+The slot machine example "Machine" is an example (in this repository) of a mixed-model with unbalanced sample sizes. 
 
 **Biodepth Example**
 ```{r}
