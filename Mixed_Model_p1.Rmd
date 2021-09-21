@@ -88,7 +88,9 @@ anova(lmeModel)
 ```
 However, now we are using a tool that can handle additional time points, continuous covariates with possibly nonlinear relationships, different types of outcome variables, other correlational structures among the observations, etc. In fact, if one looks at the help file for `aov`, one will note that it suggests using `lme` for unbalanced designs and other situations.  
 
-<span style="color:blue">*The slot machine example "Machine" is an example (in this repository) of a mixed-model with unbalanced sample sizes.*</span> 
+<span style="color:blue">*The slot machine example "Machine" is an example (in this repository) of a mixed-model with unbalanced sample sizes.*</span>
+
+<span style="color:green">*The coyote-fox home range example "Animals" is an example (in this repository) of a mixed-model with perfectly balanced sample sizes.*</span>
 
 **Biodepth Example**
 ```{r}
@@ -107,19 +109,19 @@ www.esapubs.org/archive/mono/M075/001
 
 Plot      : Factor w/ 480 levels (field plots = experimental units)
 
-Site      : Factor w/ 8 levels "Germany","Greece" (Fieldsites; Random grouping factor)
+Site      : Factor w/ 8 levels "Germany","Greece" (Fieldsites; **Random** grouping factor)
 
-Block     : Factor w/ 15 levels (2 blocks per site except Portugal; Random grouping factor)
+Block     : Factor w/ 15 levels (2 blocks per site except Portugal; **Random** grouping factor)
 
 Mix       : Factor w/ 200 levels (partially crossed species mixtures within sites)
 
 Mix_Nested: Factor w/ 220 levels (assuming full nesting of ecotypes within sites)
 
-Diversity : No. of plant species per plot (primary explanatory variable (fixed effect))
+Diversity : No. of plant species per plot (primary explanatory variable (**Fixed** effect))
 
-Shoot2    : Aboveground biomass harvested in year 2 (g m-2) [Response]
+Shoot2    : Aboveground biomass harvested in year 2 (g m-2) [**Response**]
 
-Shoot3    : Aboveground biomass harvested in year 3 (g m-2) [Response]
+Shoot3    : Aboveground biomass harvested in year 3 (g m-2) [**Response**]
 
 Diversity2: Diversity log transformed to base 2
 
@@ -154,8 +156,9 @@ productivity (due to soil, climate etc).
 The point of fitting this model here is to help us understand the
 mixed-effects analysis we want to build from these initial simple
 extremes. One way to think of the mixed-effects analysis is as a **compromise
-between the no-pooling and complete-pooling models**. before we begin
-the mixed-effects analysis there is one more fixed-effects model we
+between the no-pooling and complete-pooling models**.  
+
+Before we begin the mixed-effects analysis there is one more fixed-effects model we
 should fit.
 ```{r message=FALSE, warning=FALSE}
 qplot(Diversity, Yield, data= biodepth, 
@@ -164,13 +167,13 @@ qplot(Diversity, Yield, data= biodepth,
 ```
 Notice that by pooling the data, all the hierarchical structure is lost.
 
-##Mixed-model ANOVA using normal least squares
+**Mixed-model ANOVA using normal least squares**
 
 Prior to the relatively recent introduction of modern mixed-effects models, a typical ecological analysis might well have consisted of fitting separate relationships for each site. However, we could also consider a normal least squares analysis using the `lm()` function that includes diversity, site, and the interaction. This is similar to an ANCOVA model:
 ```{r ordinary least squares model}
 ls0 <- lm(Yield ~ Site + Diversity2 + Site:Diversity2, data=biodepth)
 ```
-This model ignores the fact that the design is blocked within sites, and that the experiment also looks at the effects of species composition by replicating each species that is grown in monoculture and each mixture of species grown in polyculture (the factor Mix with 200 levels). To include these factors we have to extend from an ANCOVA to a more complex general linear model with several explanatory variables and nuisance terms.
+This model ignores the fact that the design is **blocked within sites**, and that the experiment also looks at the effects of species composition by replicating each species that is grown in monoculture and each mixture of species grown in polyculture (the factor Mix with 200 levels). To include these factors we have to extend from an ANCOVA to a more complex general linear model with several explanatory variables and nuisance terms.
 ```{r}
 CH <- subset(biodepth, Site=="Switzerland")
 # Reorder by levels of diversity
@@ -179,7 +182,7 @@ CH[order( factor(CH$Diversity) ), ]
 cols <- rep(c('black','red','green4','blue'), each = 8)
 shapes <- rep(c(1:8),4)
 FigTen3 <- qplot(Diversity, Yield, data= CH, geom= c("point"),
-                 xlab= "Number of species", ylab= "Yield", main= "Example from Switzerland",
+                 xlab= "Number of species", ylab= "Yield", main= "Example from Switzerland; note 32 combinations of mixtures",
                  facets=.~Block, colour=Mix, shape=Mix)+
                  scale_x_continuous(trans= "log2")+theme_bw()
 FigTen3 + theme(legend.position="none") + scale_colour_manual(values=cols) + scale_shape_manual(values=shapes)
@@ -197,7 +200,7 @@ Unfortunately, the P-values for models fitted using the `lm()` function are prod
 One of the key messages is that it is normally better to focus on the estimates and intervals rather than the P-values (because what does it really mean when everything is 'significant'?).
 Another take home message is that trying to do complex mixed-model analysis within the least squares framework is fraught with difficulties and limitations and it is **better to adopt the modern maximum likelihood-based approach** to mixed-effects models.
 
-##Maximum likelihood-based mixed-effects models in R
+**Maximum likelihood-based mixed-effects models in R**
 
 Start by fitting a model that doesn't consider any interactions (keep it simple initially). We are analysing the response, yield, as a function of the fixed effect of diversity (using the log2 transformed version again) with simple random effects for sites, blocks, and mixtures. We will examine the way we specify the random effects in greater detail later but the key point to understand is that the `lme()` function **can only deal with nested random effects** as indicated by the forward slashes between site, block, and mix.
 
