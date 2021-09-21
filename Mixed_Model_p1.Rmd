@@ -88,7 +88,7 @@ anova(lmeModel)
 ```
 However, now we are using a tool that can handle additional time points, continuous covariates with possibly nonlinear relationships, different types of outcome variables, other correlational structures among the observations, etc. In fact, if one looks at the help file for `aov`, one will note that it suggests using `lme` for unbalanced designs and other situations.  
 
-The slot machine example "Machine" is an example (in this repository) of a mixed-model with unbalanced sample sizes. 
+<span style="color:blue">*The slot machine example "Machine" is an example (in this repository) of a mixed-model with unbalanced sample sizes.*</span> 
 
 **Biodepth Example**
 ```{r}
