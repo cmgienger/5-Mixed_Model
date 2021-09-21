@@ -1,0 +1,116 @@
+---
+title: "Mixed Models - Unbalanced Repeated Measures"
+subtitle: "Slots-o-Fun"
+output: html_notebook
+---
+Unbalanced repeated measures ANOVA; Data are ratings for three slot machines, each used by six different players.  
+We can model this as a mixed-model ANOVA since we have repeated measurements from each individual; often playing more than once on each machine type (treatment). Data can be considered hierarchical.    
+(Example from JMP: Machine.jmp; model specification slightly different than example).
+
+```{r load libraries, include=FALSE}
+library(tidyverse) #magic sauce
+library(lme4) #mixed model calculations
+library(lmerTest) #p-values from mixed-models
+library(emmeans) #calculate model-adjusted means
+library(ggtext) #for putting pictures as labels
+library(performance) #used for mixed model visualization; now on CRAN
+```
+![](img/slots.png)
+
+```{r import data, message=FALSE}
+data <- read_csv("Machine2.csv")
+data$person <- as.factor(data$person) #make person ID a factor
+```
+
+```{r plot individual across machines}
+p1<- ggplot(data, aes(x=machine, y=rating, group=person, color=person, shape=person)) + 
+  geom_point(size=4, position = position_dodge2(width=.33, preserve = "total")) +
+  geom_line()+
+  labs(title="The Bandit Gives Back: Rating Popular Slot Machines", x= "Slot Machine", y = "Machine Rating (yield/$100 played)")
+
+  p1
+```
+
+
+```{r summarize data and plot, message=FALSE}
+machines_means <- data %>%
+  group_by(machine) %>%
+  summarise(mean_rating=mean(rating),
+            se_rating=sd(rating)/sqrt(n()))
+machines_means
+```
+
+
+```{r}
+mixed_machine <- lmer(rating~(machine*person)+(1|person), data = data)
+
+anova(mixed_machine) #notice it doesn't report whether whole model is significant or model fit, but we likely don't care anyway.
+```
+```{r}
+summary(mixed_machine)
+```
+```{r check model, fig.width=9.5, fig.height=9}
+check_model(mixed_machine)
+```
+```{r fit emmeans from model - each machine}
+#calculate model-adjusted means (e.g. estimated marginal means)
+mixed_machine_emm <- emmeans(mixed_machine, "machine")
+mixed_machine_emm
+```
+```{r fit emmeans from model - each person}
+emmeans(mixed_machine, "person")
+```
+```{r fit emmeans from model - each person*machine}
+emmeans(mixed_machine, "machine", "person") #reverse the order of factors for alternative output
+```
+```{r fit emmeans from model - each person*machine [alternate format]}
+emmeans(mixed_machine, "person", "machine")
+```
+
+
+```{r emmeans as dataframe for use in plotting}
+data_emm <- as.data.frame(mixed_machine_emm)
+data_emm
+#model-adjusted means (emm) are different than raw means (see above); adjusted for the same person repeatedly evaluating the machines.
+```
+```{r}
+machines_means
+```
+
+```{r use pictures as labels, message=TRUE}
+#https://github.com/wilkelab/ggtext
+labels <- c(
+  bell = "<img src='img/bell.jpg' width='75' /><br>Bell of Fortune", #redefine labels based on groups in df
+  diamond = "<img src='img/diamond.jpg' width='75' /><br>Diamond Blitz",
+  fruit = "<img src='img/fruit.jpg' width='75' /><br>Fruit Bonanza"
+)
+```
+
+```{r plot emmeans, message=TRUE}
+##put raw means next to emmeans for visualization
+p2<- ggplot(data_emm, aes(x=machine, y=emmean)) + 
+  geom_point(size=4) +
+  geom_errorbar(aes(ymin=emmean-SE, ymax=emmean+SE), width=.2) +
+  labs(title="The Bandit Gives Back: Rating Popular Slot Machines", x= NULL, y = "Machine Rating (yield/$100 played)") +
+  geom_point(data=machines_means, size=4, x=machines_means$machine, y=machines_means$mean_rating, color="blue") +
+  theme(axis.text.x = ggtext::element_markdown(color = "blue", size = 12)) +
+  scale_x_discrete(name = NULL, labels = labels)+
+  ylim(50, 67)
+             
+p2
+```
+Raw means are not all that different from model-adjusted means (emmeans), but does change the inference slightly.
+
+```{r pairwise contrasts BETWEEN machines}
+pairs(emmeans(mixed_machine, "machine")) 
+```
+
+```{r pairwise contrasts BETWEEN people}
+pairs(emmeans(mixed_machine, "person"))
+```
+```{r all season:species pairwise CONTRASTS}
+emmeans(mixed_machine, specs = pairwise ~ machine:person)
+#probably no a priori reason to use this table, but here it is.
+```
+
+

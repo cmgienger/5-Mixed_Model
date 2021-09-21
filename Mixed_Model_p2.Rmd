@@ -1,0 +1,52 @@
+---
+title: "Mixed-Effects Models"
+subtitle: "Hector 2015 Chapter 10" 
+output:
+  html_notebook:
+    toc: yes
+---
+```{r setup2, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+packages_needed <- c("ggplot2", # graphics
+                     "dplyr",
+                     "arm", # display() etc.
+                     "MASS",
+                     "ggfortify",
+                     "nlme",
+                     "lme4"
+                     )
+pk_to_install <- packages_needed [!( packages_needed %in% rownames(installed.packages())  )]
+if(length(pk_to_install)>0 ){
+  install.packages(pk_to_install,repos="http://cran.r-project.org")
+}
+#lapply(packages_needed, require, character.only = TRUE)
+library(ggplot2)
+library(dplyr)
+library(arm)
+library(MASS)
+library(ggfortify)
+library(nlme)
+library(lme4)
+```
+#Part Two: Random intercepts vs. random intercept and slope models
+
+##Sleep Example
+
+Bates et al. "Fitting Linear Mixed-Effects Models Using lme4"
+https://cran.r-project.org/web/packages/lme4/vignettes/lmer.pdf
+
+Average reaction time per day for subjects in a sleep deprivation study (Belenkyet al.2003). On day 0 the subjects had their normal amount of sleep. Starting that night they were restricted to three hours of sleep per night for nine days. 
+```{r sleep data}
+sleepstudy
+```
+```{r}
+fm1 <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
+
+ggplot(data=sleepstudy, aes(Days, Reaction)) + 
+  geom_point() +
+  stat_smooth(method="lm", se=FALSE) + facet_wrap(.~Subject, nrow = 2) +
+  xlab("Days of Sleep Deprivation") +
+  ylab("Average Reaction Time (ms)") +
+  scale_x_continuous(breaks=seq(0, 9, 3))  # Ticks from 0-9, every 3
+```
+Continue using BATES EXAMPLES....p. 31
