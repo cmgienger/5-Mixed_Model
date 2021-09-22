@@ -1,6 +1,6 @@
 ---
 title: "Mixed-Effects Models"
-subtitle: "Hector 2015 Chapter 10" 
+subtitle: "Misc. Hierarchical Examples" 
 output:
   html_notebook:
     toc: yes
@@ -14,7 +14,8 @@ packages_needed <- c("ggplot2", # graphics
                      "ggfortify",
                      "nlme",
                      "lme4",
-                     "lmerTest"
+                     "lmerTest",
+                     "asbio"
                      )
 pk_to_install <- packages_needed [!( packages_needed %in% rownames(installed.packages())  )]
 if(length(pk_to_install)>0 ){
@@ -29,7 +30,119 @@ library(ggfortify)
 library(nlme)
 library(lme4)
 library(lmerTest)
+library(asbio) # Aho 2014 example data
 ```
+**Review of Fixed vs. Random Effects** (Aho 2014)
+
+Fixed factor levels have two characteristics: (1) they are not an obvious subset of a population
+of factor levels, and (2) the factor levels are informative, and are chosen by the investigator
+specifically because they have a unique and important meaning. Examples of fixed
+factor levels include:  
+
+ * Male and female
+ * Predator and prey
+ * Drug A, drug B, and drug C
+ * Control and treatment
+ * Before and after
+ * Tree, grass, shrub, and so on
+ * Particular variants on a predictor, for example, “high,” “medium,” and “low”  
+ 
+Random factor levels have two characteristics: (1) the selected factor levels often can be
+considered a subset from a population of possible levels, and (2) the factor levels are not informative.
+Because of these characteristics, we are unlikely to care about particular differences
+among factor levels. Random factor levels include:  
+
+ * Time intervals in a time sequence
+ * A collection of seed types (or some other levels) chosen randomly from a population
+of seed types (or some other population)
+ * Nested groups in an observational study
+ * Subjects on whom repeated measurements are made
+
+If all factors contain fixed factor levels, then one would use a conventional fixed effect
+model for hypothesis testing procedures. Conversely, if all factors are random, then one
+should use a random effect model. A design with both random and fixed factors will require
+a *mixed effect model*. Fixed, random, and mixed effect models are also called model I, model
+II, and model III ANOVAs, respectively.
+\
+\
+**Nested Design: Mosquito Wing Length** (Aho 2014, Example 10.13)  
+Sokal and Rohlf (2012) measured the variability in wing length (in micrometers) for
+female mosquitos (Aedes intrudens). Four females were randomly selected from three
+cages and two measurements were made on the left wing of each. Both cage and female
+(in cage) can be seen as random effects. The data are in the dataframe mosquito.
+```{r plot mosquito data}
+ggplot(mosquito, aes(cage, length, colour = female)) + 
+  geom_point(size=5)
+```
+
+```{r mosquito model1}
+data(mosquito)
+aedes.1 <- lmer(length ~ (1|cage/female), data = mosquito)
+summary(aedes.1)
+```
+Because the design is perfectly balanced, we can obtain the variance component estimates
+using mean squares from a conventional ANOVA. But this is confusing because df are different than what we might expect (there were only 12 mosquitos in the experiment).
+```{r linear model}
+anova(lm(length ~ cage/female, data = mosquito))
+```
+But maybe we are actually specifically interested in the differences among cages (cage as fixed effect); or if we had unbalanced sampling. 
+```{r mosquito model2}
+aedes.2 <- lmer(length ~ cage + (1|female), data = mosquito)
+summary(aedes.2)
+```
+```{r mixed model}
+anova(aedes.2)
+```
+We can test to see which model fits the data best.
+```{r}
+anova(aedes.2,aedes.1, test = "Chisq")
+```
+Model 1 does a better job (lower deviance) as it has better accounted for the full hierarchical nature of the data. Ignore the P-values for now, there is some difficulty comparing mixed models in this way (requires nested subsets).  
+We can also use the `emmeans' package to compare levels (see previous examples).  
+\
+\
+\
+**Liver Glycogen in Rats** (Aho 2014, Example 10.14)   
+Sokal and Rohlf (2012) described a hierarchical experimental design to determine the
+effect of diet on glycogen levels in rat livers. **Six rats** were randomly assigned one of
+**three diets**: “control,” “compound 217,” and “compound 217 + sugar.” After a short
+period of time, the rats were euthanized and glycogen levels in their livers were measured.
+**Two glycogen measurements** were made for each of **three preparations of each liver** from each rat.
+In this case, the diet is fixed, while liver preparation (in diet) and
+glycogen measurements (in liver in diet) are random.
+
+```{r rat liver plot}
+#this visualization is a bit tough because of the way the data are coded (1, 2, 3)
+ggplot(rat, aes(diet, glycogen, colour = liver)) + 
+  geom_point(size=5) +
+  annotate("text", x = 3, y = 160, label = "6 rats, 3 diets = 2 rats/diet") +
+  annotate("text", x = 2.85, y = 155, label = "3 liver samples, 2 measurements/sample") +
+  annotate("text", x = 2.85, y = 145, label = "OK, I'm confused now.")
+```
+First, **lets do it the wrong way** and show how pseudoreplication can result in incorrect analyses.
+Of primary interest is the detection of differences in the fixed factor of diet. By treating
+each measure in each liver preparation in each rat as independent observations, we get a model with inflated degrees of freedom.
+```{r glycogen linear model}
+data(rat) #from asbio package
+anova(lm(glycogen ~ diet, data = rat))
+```
+The analysis tells us that df error = 33; however, there are only six rats. Thus, df error should be
+n – a = 6 – 3 = 3. Pseudoreplication has artificially inflated sample sizes, and increased
+the probability of type I error.  Using a mixed-model approach, we can obtain variance components estimates for the
+model.
+
+```{r}
+rat.1 <- lmer(glycogen ~ diet + (1|diet/rat/liver), data = rat)
+rat.1
+```
+```{r}
+summary(rat.1)
+```
+```{r}
+anova(rat.1)
+```
+Notice this inference (P=0.23) is much different than the linear model that included pseudoreplicates of individuals (P=3.031e-05).
+
 
 **Biodepth Example**
 ```{r}
@@ -113,7 +226,7 @@ Prior to the relatively recent introduction of modern mixed-effects models, a ty
 ls0 <- lm(Yield ~ Site + Diversity2 + Site:Diversity2, data=biodepth)
 ```
 This model ignores the fact that the design is **blocked within sites**, and that the experiment also looks at the effects of species composition by replicating each species that is grown in monoculture and each mixture of species grown in polyculture (the factor Mix with 200 levels). To include these factors we have to extend from an ANCOVA to a more complex general linear model with several explanatory variables and nuisance terms.
-```{r}
+```{r show combinations of variables}
 CH <- subset(biodepth, Site=="Switzerland")
 # Reorder by levels of diversity
 CH[order( factor(CH$Diversity) ), ]

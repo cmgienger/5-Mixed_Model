@@ -1,6 +1,6 @@
 ---
 title: "Mixed-Effects Models"
-subtitle: "Random Intercepts and Random SLopes" 
+subtitle: "Random Intercepts and Random Slopes" 
 output:
   html_notebook:
     toc: yes
@@ -13,7 +13,8 @@ packages_needed <- c("ggplot2", # graphics
                      "MASS",
                      "ggfortify",
                      "nlme",
-                     "lme4"
+                     "lme4",
+                     "lmerTest"
                      )
 pk_to_install <- packages_needed [!( packages_needed %in% rownames(installed.packages())  )]
 if(length(pk_to_install)>0 ){
@@ -27,10 +28,11 @@ library(MASS)
 library(ggfortify)
 library(nlme)
 library(lme4)
+library(lmerTest)
 ```
-#Part Three: Random intercepts vs. random intercept and slope models
+Part Three: Random intercepts vs. random intercept and slope models
 
-##Sleep Example
+**Sleep Example**
 
 Bates et al. "Fitting Linear Mixed-Effects Models Using lme4"
 https://cran.r-project.org/web/packages/lme4/vignettes/lmer.pdf
@@ -39,9 +41,8 @@ Average reaction time per day for subjects in a sleep deprivation study (Belenky
 ```{r sleep data}
 sleepstudy
 ```
-```{r}
-fm1 <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
 
+```{r plot sleep data}
 ggplot(data=sleepstudy, aes(Days, Reaction)) + 
   geom_point() +
   stat_smooth(method="lm", se=FALSE) + facet_wrap(.~Subject, nrow = 2) +
@@ -49,4 +50,10 @@ ggplot(data=sleepstudy, aes(Days, Reaction)) +
   ylab("Average Reaction Time (ms)") +
   scale_x_continuous(breaks=seq(0, 9, 3))  # Ticks from 0-9, every 3
 ```
-Continue using BATES EXAMPLES....p. 31
+```{r fit and summarize mixed model}
+fm1 <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
+summary(fm1)
+```
+We are probably not intrinsically interested in comparing the different individuals that participated in the study.
+
+Continues on Bates p.31
