@@ -65,14 +65,22 @@ a *mixed effect model*. Fixed, random, and mixed effect models are also called m
 II, and model III ANOVAs, respectively.
 \
 \
+**Examples of different types of hierarchical models** (Schielzeth and Nakagawa 2013, Methods in Ecology and Evolution)
+https://besjournals.onlinelibrary.wiley.com/doi/10.1111/j.2041-210x.2012.00251.x
+\
+\
+![](images/hierarchical_designs.jpg)
+\
+\
 **Nested Design: Mosquito Wing Length** (Aho 2014, Example 10.13)  
 Sokal and Rohlf (2012) measured the variability in wing length (in micrometers) for
-female mosquitos (Aedes intrudens). Four females were randomly selected from three
+female mosquitos (*Aedes intrudens*). Four females were randomly selected from three
 cages and two measurements were made on the left wing of each. Both cage and female
 (in cage) can be seen as random effects. The data are in the dataframe mosquito.
 ```{r plot mosquito data}
+data("mosquito")
 ggplot(mosquito, aes(cage, length, colour = female)) + 
-  geom_point(size=5)
+  geom_jitter(aes(fill=female), colour="black",pch=21, size=5, width = .05)
 ```
 
 ```{r mosquito model1}
@@ -113,12 +121,23 @@ glycogen measurements (in liver in diet) are random.
 
 ```{r rat liver plot}
 #this visualization is a bit tough because of the way the data are coded (1, 2, 3)
+data(rat)
 ggplot(rat, aes(diet, glycogen, colour = liver)) + 
   geom_point(size=5) +
   annotate("text", x = 3, y = 160, label = "6 rats, 3 diets = 2 rats/diet") +
-  annotate("text", x = 2.85, y = 155, label = "3 liver samples, 2 measurements/sample") +
+  annotate("text", x = 2.85, y = 155, label = "3 liver sections, 2 measurements/section") +
   annotate("text", x = 2.85, y = 145, label = "OK, I'm confused now.")
 ```
+```{r import recoded data for visualization}
+rat_recoded <- read.csv("data/rat_recoded.csv")
+ggplot(rat_recoded, aes(diet, glycogen, colour = as.factor(rat), shape=as.factor(liver))) + 
+  geom_jitter(width =0.15, size=5) +
+  annotate("text", x = 3, y = 160, label = "3 diets with 2 rats/diet") +
+  annotate("text", x = 2.85, y = 157, label = "3 liver sections") +
+  annotate("text", x = 2.85, y = 154, label = "2 measurements/section") +
+  annotate("text", x = 2.85, y = 145, label = "36 total measurements", size=5, color="blue")
+```
+\
 First, **lets do it the wrong way** and show how pseudoreplication can result in incorrect analyses.
 Of primary interest is the detection of differences in the fixed factor of diet. By treating
 each measure in each liver preparation in each rat as independent observations, we get a model with inflated degrees of freedom.
@@ -131,7 +150,7 @@ n – a = 6 – 3 = 3. Pseudoreplication has artificially inflated sample sizes,
 the probability of type I error.  Using a mixed-model approach, we can obtain variance components estimates for the
 model.
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 rat.1 <- lmer(glycogen ~ diet + (1|diet/rat/liver), data = rat)
 rat.1
 ```
@@ -194,6 +213,7 @@ qplot(Diversity, Yield, data= biodepth, geom= c("point", "smooth"), method= "lm"
       xlab= "Number of species", ylab= "Yield", main= "No pooling analysis: Separated by Site (Country)",
       facets=.~Site)+scale_x_continuous(trans= "log2")+theme_bw()
 ```
+
 Note that the x-axis in the plots are log transformed because
 in general this produces approximately linear relationships (productivity
 cannot increase without limit, leading us to expect declining returns with
@@ -217,6 +237,7 @@ qplot(Diversity, Yield, data= biodepth,
       geom= c("point", "smooth"), method= "lm", main= "Complete pooling analysis: All sites combined",
       xlab= "Number of species", ylab= "Yield")+scale_x_continuous(trans= "log2")+theme_bw()
 ```
+
 Notice that by pooling the data, all the hierarchical structure is lost.
 
 **Mixed-model ANOVA using normal least squares**
@@ -239,6 +260,7 @@ FigTen3 <- qplot(Diversity, Yield, data= CH, geom= c("point"),
                  scale_x_continuous(trans= "log2")+theme_bw()
 FigTen3 + theme(legend.position="none") + scale_colour_manual(values=cols) + scale_shape_manual(values=shapes)
 ```
+
 The BIODEPTH experimental design at one example field site (Switzerland). At each site the regression of yield on diversity is repeated in two blocks (D and E). To separate the effects of species number (diversity) and species composition, replicate communities within each diversity level have different species composition. Each species composition (monoculture or polyculture) occurs once within each block so that both species richness and composition are replicated.
 ```{r}
 ls1 <- lm(terms(Yield~Site+Block+Diversity2+Site:Diversity2+Mix+Site:Mix, keep.order= TRUE), data= biodepth)
