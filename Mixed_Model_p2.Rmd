@@ -45,7 +45,7 @@ factor levels include:
  * Control and treatment
  * Before and after
  * Tree, grass, shrub, and so on
- * Particular variants on a predictor, for example, “high,” “medium,” and “low”  
+ * Particular variants on a predictor, for example, “high”, “medium”, and “low”  
  
 Random factor levels have two characteristics: (1) the selected factor levels often can be
 considered a subset from a population of possible levels, and (2) the factor levels are not informative.
@@ -116,9 +116,10 @@ using mean squares from a conventional ANOVA. But this is confusing because df a
 anova(lm(length ~ cage/female, data = mosquito))
 ```
 But maybe we are actually specifically interested in the differences among cages (cage as fixed effect); or if we had unbalanced sampling. 
-```{r mosquito model2}
+```{r mosquito model2, message=FALSE, warning=FALSE}
 aedes.2 <- lmer(length ~ cage + (1|cage/female), data = mosquito)
-#aedes.wrong <- lmer(length ~ cage + (1|female), data = mosquito) # this notation assumes every female is in every treatment; they are not 
+# aedes.wrong <- lmer(length ~ cage + (1|female), data = mosquito) 
+# this notation assumes every female is in every treatment; they are not 
 summary(aedes.2)
 ```
 ```{r mixed model}
@@ -144,13 +145,16 @@ glycogen measurements (in liver in diet) are random.
 
 ```{r rat liver plot}
 #this visualization is a bit tough because of the way the data are coded (1, 2, 3)
-data(rat)
+data(rat) #from asbio package
 ggplot(rat, aes(diet, glycogen, colour = liver)) + 
   geom_point(size=5) +
   annotate("text", x = 3, y = 160, label = "6 rats, 3 diets = 2 rats/diet") +
   annotate("text", x = 2.85, y = 155, label = "3 liver sections, 2 measurements/section") +
   annotate("text", x = 2.85, y = 145, label = "OK, I'm confused now.")
 ```
+\
+As an exercise, make a schematic of what you expect this design to look like.
+\
 ```{r import recoded data for visualization}
 rat_recoded <- read.csv("data/rat_recoded.csv")
 ggplot(rat_recoded, aes(diet, glycogen, colour = as.factor(rat), shape=as.factor(liver))) + 
@@ -165,7 +169,6 @@ First, **lets do it the wrong way** and show how pseudoreplication can result in
 Of primary interest is the detection of differences in the fixed factor of diet. By treating
 each measure in each liver preparation in each rat as independent observations, we get a model with inflated degrees of freedom.
 ```{r glycogen linear model}
-data(rat) #from asbio package
 anova(lm(glycogen ~ diet, data = rat))
 ```
 The analysis tells us that df error = 33; however, there are only six rats. Thus, df error should be
