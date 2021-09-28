@@ -1,6 +1,6 @@
 ---
 title: "Mixed-Effects Models"
-subtitle: "Repeated Measures Examples" 
+subtitle: "Misc. Hierarchical Examples-Crossed" 
 output:
   html_notebook:
     toc: yes

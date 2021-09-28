@@ -30,7 +30,7 @@ library(nlme)
 library(lme4)
 library(lmerTest)
 ```
-Part Three: Random intercepts vs. random intercept and slope models
+Part Three: Random intercepts vs. random intercept and slope models (NOT COMPLETED)
 
 **Sleep Example**
 
