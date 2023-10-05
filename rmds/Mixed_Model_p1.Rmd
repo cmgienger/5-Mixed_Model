@@ -2,7 +2,7 @@
 title: "Mixed-Effects Models"
 subtitle: "Misc. Hierarchical Examples-Crossed" 
 output:
-  html_notebook:
+  html_document:
     toc: yes
 ---
 ```{r setup2, include=FALSE}
@@ -101,7 +101,7 @@ We can model this as a mixed-model ANOVA since we have repeated measurements fro
 ![](images/slots.png)
 
 ```{r import machine data, message=FALSE}
-data <- read.csv("data/Machine2.csv")
+data <- read.csv("../data/Machine2.csv")
 data$person <- as.factor(data$person) #make person ID a factor
 ```
 
@@ -168,9 +168,9 @@ machines_means
 ```{r use pictures as labels, message=TRUE}
 #https://github.com/wilkelab/ggtext
 labels <- c(
-  bell = "<img src='images/bell.jpg' width='75' /><br>Bell of Fortune", #redefine labels based on groups in df
-  diamond = "<img src='images/diamond.jpg' width='75' /><br>Diamond Blitz",
-  fruit = "<img src='images/fruit.jpg' width='75' /><br>Fruit Bonanza"
+  bell = "<img src='../images/bell.jpg' width='75' /><br>Bell of Fortune", #redefine labels based on groups in df
+  diamond = "<img src='../images/diamond.jpg' width='75' /><br>Diamond Blitz",
+  fruit = "<img src='../images/fruit.jpg' width='75' /><br>Fruit Bonanza"
 )
 ```
 
@@ -207,7 +207,7 @@ emmeans(mixed_machine, specs = pairwise ~ machine:person)
 
 **Animals**
 ```{r import animal data, message=FALSE}
-Animals <- read.csv("data/Animals.csv")
+Animals <- read.csv("../data/Animals.csv")
 ```
 
 ```{r summarize animal data and plot, message=FALSE}
