@@ -2,7 +2,7 @@
 title: "Mixed-Effects Models"
 subtitle: "Misc. Hierarchical Examples-Nested" 
 output:
-  html_notebook:
+  html_document:
     toc: yes
 ---
 ```{r setup2, include=FALSE}
@@ -69,7 +69,7 @@ II, and model III ANOVAs, respectively.
 https://besjournals.onlinelibrary.wiley.com/doi/10.1111/j.2041-210x.2012.00251.x
 \
 \
-![](images/hierarchical_designs.jpg)
+![](../images/hierarchical_designs.jpg)
 \
 \
 **Nested Design: Mosquito Wing Length** (Aho 2014, Example 10.13)  
@@ -92,7 +92,7 @@ mosquito
 
 
 ```{r less confusing mosquito figure}
-mosquito.recoded <- read.csv("data/mosquito.recoded.csv")
+mosquito.recoded <- read.csv("../data/mosquito.recoded.csv")
 ggplot(mosquito.recoded, aes(cage, length, colour = as.factor(female), shape=as.factor(measures))) + 
   geom_jitter(width =0.15, size=5) +
   annotate("text", x = 2, y = 82.5, label = "12 females") +
@@ -156,7 +156,7 @@ ggplot(rat, aes(diet, glycogen, colour = liver)) +
 As an exercise, make a schematic of what you expect this design to look like.
 \
 ```{r import recoded data for visualization}
-rat_recoded <- read.csv("data/rat_recoded.csv")
+rat_recoded <- read.csv("../data/rat_recoded.csv")
 ggplot(rat_recoded, aes(diet, glycogen, colour = as.factor(rat), shape=as.factor(liver))) + 
   geom_jitter(width =0.15, size=5) +
   annotate("text", x = 3, y = 160, label = "3 diets with 2 rats/diet") +
@@ -190,11 +190,11 @@ Notice this inference (P=0.23) is much different than the linear model that incl
 
 
 Example of Russian Dolls 'Nested' Within One Another; Analogous to Nested Effects in Model Specification
-![Russian Doll](images/RussianDoll.jpg){width=400px}
+![Russian Doll](../images/RussianDoll.jpg){width=400px}
 
 **Nested random effects** are when each member of one group is contained entirely within a single unit of another group. The canonical example is students in classrooms; you may have repeated measures per student, but each student belongs to a single classroom (assuming no reassignments).
 
 **Crossed random effects** are when this nesting is not true. An example would be different seeds and different fields used for planting crops. Seeds of the same type can be planted in different fields, and each field can have multiple seeds in it.
 
-![](images/nested_crossed.jpeg)
+![](../images/nested_crossed.jpeg)
 

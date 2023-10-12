@@ -2,7 +2,7 @@
 title: "Mixed-Effects Models"
 subtitle: "Misc. Hierarchical Examples-Biodepth Example from Hector 2015" 
 output:
-  html_notebook:
+  html_document:
     toc: yes
 ---
 ```{r setup2, include=FALSE}
@@ -36,10 +36,10 @@ library(asbio) # Aho 2014 example data
 https://besjournals.onlinelibrary.wiley.com/doi/10.1111/j.2041-210x.2012.00251.x
 \
 \
-![](images/hierarchical_designs.jpg)
+![](../images/hierarchical_designs.jpg)
 **Biodepth Example**
 ```{r}
-biodepth <- read.delim("data/biodepth.txt", header=TRUE)
+biodepth <- read.delim("../data/biodepth.txt", header=TRUE)
 ```
 The BIODEPTH (Biodiversity and Ecosystem Processes in Terrestrial Herbaceous Ecosystems)
 project manipulated levels of grassland plant diversity in field plots to simulate the
@@ -70,7 +70,7 @@ Shoot3    : Aboveground biomass harvested in year 3 (g m-2) [**Response**]
 
 Diversity2: Diversity log transformed to base 2
 
-![](images/biodepth.jpg){width=800px}
+![](../images/biodepth.jpg){width=800px}
 
 ```{r convert and transform variables as needed}
 biodepth$Mix <- factor(biodepth$Mix)
@@ -121,7 +121,7 @@ Prior to the relatively recent introduction of modern mixed-effects models, a ty
 ls0 <- lm(Yield ~ Site + Diversity2 + Site:Diversity2, data=biodepth)
 ```
 This model ignores the fact that the design is **blocked within sites**, and that the experiment also looks at the effects of species composition by replicating each species that is grown in monoculture and each mixture of species grown in polyculture (the factor Mix with 200 levels). To include these factors we have to extend from an ANCOVA to a more complex general linear model with several explanatory variables and nuisance terms.
-```{r show combinations of variables}
+```{r show combinations of variables, message=FALSE, warning=FALSE}
 CH <- subset(biodepth, Site=="Switzerland")
 # Reorder by levels of diversity
 CH[order( factor(CH$Diversity) ), ]
@@ -153,7 +153,7 @@ Another take home message is that trying to do complex mixed-model analysis with
 Start by fitting a model that doesn't consider any interactions (keep it simple initially). We are analysing the response, yield, as a function of the fixed effect of diversity (using the log2 transformed version again) with simple random effects for sites, blocks, and mixtures. We will examine the way we specify the random effects in greater detail later but the key point to understand is that the `lme()` function **can only deal with nested random effects** as indicated by the forward slashes between site, block, and mix.
 
 Example of Russian Dolls 'Nested' Within One Another; Analogous to Nested Effects in Model Specification
-![Russian Doll](images/RussianDoll.jpg){width=400px}
+![Russian Doll](../images/RussianDoll.jpg){width=400px}
 ```{r}
 library(nlme)
 mem1 <- lme(Yield~Diversity2, random= ~1|Site/Block/Mix, na.action= na.exclude, data= biodepth)
@@ -170,7 +170,7 @@ Whether random effects are nested or crossed is a property of the data, not the 
 
 **Crossed random effects** are when this nesting is not true. An example would be different seeds and different fields used for planting crops. Seeds of the same type can be planted in different fields, and each field can have multiple seeds in it.
 
-![](images/nested_crossed.jpeg)
+![](../images/nested_crossed.jpeg)
 
 If each mixture occurred in only one block then the design would be fully nested. If every mixture was replicated in every block then the design would be fully crossed. In fact what we have is something in between that looks like the bottom panel. Mixtures in the BIODEPTH design are mostly nested within blocks but some do reoccur in different blocks introducing partial crossing.
 

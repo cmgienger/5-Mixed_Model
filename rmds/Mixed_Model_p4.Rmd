@@ -2,7 +2,7 @@
 title: "Mixed-Effects Models"
 subtitle: "Random Intercepts and Random Slopes" 
 output:
-  html_notebook:
+  html_document:
     toc: yes
 ---
 ```{r setup2, include=FALSE}
