@@ -135,6 +135,7 @@ p1a<- ggplot(data, aes(x=machine, y=rating, group=person, color=person, shape=pe
   #geom_line() +
   geom_smooth(method = "lm", se = FALSE) +
   labs(title="The Bandit Gives Back: Rating Slot Machines",
+       subtitle = "Notice unbalanced sampling of individuals",
        x= "Slot Machine", 
        y = "Yield/$100 played")
 
@@ -143,6 +144,7 @@ p1b <- ggplot(data, aes(x=machine, y=rating, color=machine)) +
   geom_boxplot() +
   scale_y_continuous(labels=scales::dollar_format()) +
   labs(title="The Bandit Gives Back: Rating Slot Machines",
+       subtitle = "Raw data; does not adjust for repeated measures of individuals",
        x= "Slot Machine", 
        y = "Yield/$100 played")
 
