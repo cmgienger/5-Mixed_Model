@@ -142,6 +142,20 @@ data <- read.csv("../data/Machine2.csv")
 data$person <- as.factor(data$person) #make person ID a factor
 ```
 
+Unbalanced data: Not every individual equally represented across treatments
+
+```{r}
+ggplot(data, aes(machine)) +
+  geom_bar(aes(fill = person)) +
+  scale_y_continuous(breaks=seq(0,18,3)) +
+  theme_cmg()
+
+
+#ggplot(data, aes(fill=person, y=person, x=machine)) + 
+  #geom_bar(position='stack', stat='count')
+```
+
+
 ```{r plot individual across machines, fig.height = 8, message=FALSE, warning=FALSE}
 p1a<- ggplot(data, aes(x=machine, y=rating, group=person, color=person, shape=person)) + 
   geom_point(size=4, position = position_dodge2(width=.33, preserve = "total")) +
