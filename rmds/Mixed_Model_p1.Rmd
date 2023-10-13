@@ -144,12 +144,12 @@ data$person <- as.factor(data$person) #make person ID a factor
 
 Unbalanced data: Not every individual equally represented across treatments
 
-```{r}
+```{r distribution of players X machines}
 ggplot(data, aes(machine)) +
   geom_bar(aes(fill = person)) +
   scale_y_continuous(breaks=seq(0,18,3)) +
   ggtitle(label = "Unbalanced Sample Sizes",
-          subtitle = "n = 6 participants with repeated plays") +
+          subtitle = "n = 6 participants with repeated plays (44 total plays)") +
   theme_cmg()
 ```
 
@@ -227,7 +227,7 @@ data_emm
 #model-adjusted means (emm) are different than raw means (see above); adjusted for the same person repeatedly evaluating the machines.
 ```
 
-```{r}
+```{r means of machine scores}
 machines_means
 ```
 
@@ -290,13 +290,13 @@ summary <- Animals %>%
 summary
 ```
 
-```{r}
+```{r fit mixed model for animals}
 mixed_animals <- lmer(miles~species*season+(1|subject), data = Animals)
 #note syntax for model specification:compact syntax
 anova(mixed_animals) #gives us tests for fixed effects
 ```
 
-```{r}
+```{r summary mixed model for animals}
 summary(mixed_animals)
 ```
 
@@ -317,7 +317,7 @@ data_emm
 #model-adjusted means (emm) are identical to raw means (see above) since nothing really being adjusted in fully balanced experiment.
 ```
 
-```{r}
+```{r notes of SE estimates for emmeans}
 #notice that SE is same value for all emmeans: this is expected
 
 #https://www.ibm.com/support/pages/estimated-marginal-means-all-have-same-standard-error-spss#:~:text=Both%20are%20correct%2C%20because%20the,variation%20about%20that%20group's%20mean.&text=The%20model%20is%20that%20each,same%20for%20all%20the%20groups.
