@@ -177,6 +177,8 @@ p1b <- ggplot(data, aes(x=machine, y=rating, color=machine)) +
   p1a / p1b #uses library(patchwork) for plot organization)
 ```
 
+https://www.americancasinoguidebook.com/slot-machine-payback-statistics.html#Nevada
+
 ```{r summarize machine data and plot, message=FALSE}
 machines_means <- data %>%
   group_by(machine) %>%
