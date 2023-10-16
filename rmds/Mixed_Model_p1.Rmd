@@ -18,7 +18,8 @@ packages_needed <- c("ggplot2", # graphics
                      "lmerTest",
                      "emmeans",
                      "ggtext",
-                     "patchwork"
+                     "patchwork",
+                     "easystats"
                      )
 pk_to_install <- packages_needed [!( packages_needed %in% rownames(installed.packages())  )]
 if(length(pk_to_install)>0 ){
@@ -36,6 +37,7 @@ library(lmerTest)
 library(emmeans)
 library(ggtext)
 library(patchwork)
+library(easystats) #plot group-level scores of mixed models
 
 sys.source("../scripts/theme_cmg.R", envir = knitr::knit_global())
 ```
@@ -145,14 +147,13 @@ data$person <- as.factor(data$person) #make person ID a factor
 Unbalanced data: Not every individual equally represented across treatments
 
 ```{r distribution of players X machines}
-ggplot(data, aes(machine)) +
-  geom_bar(aes(fill = person)) +
+ggplot(data, aes(machine, fill=person)) +
+  geom_bar(color="black") +
   scale_y_continuous(breaks=seq(0,18,3)) +
   ggtitle(label = "Unbalanced Sample Sizes",
           subtitle = "n = 6 participants with repeated plays (44 total plays)") +
   theme_cmg()
 ```
-
 
 ```{r plot individual across machines, fig.height = 8, message=FALSE, warning=FALSE}
 p1a<- ggplot(data, aes(x=machine, y=rating, group=person, color=person, shape=person)) + 
@@ -177,7 +178,7 @@ p1b <- ggplot(data, aes(x=machine, y=rating, color=machine)) +
   p1a / p1b #uses library(patchwork) for plot organization)
 ```
 
-https://www.americancasinoguidebook.com/slot-machine-payback-statistics.html#Nevada
+<https://www.americancasinoguidebook.com/slot-machine-payback-statistics.html#Nevada>
 
 ```{r summarize machine data and plot, message=FALSE}
 machines_means <- data %>%
