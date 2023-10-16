@@ -34,7 +34,7 @@ library(asbio) # Aho 2014 example data
 ```
 **Review of Fixed vs. Random Effects** (Aho 2014)
 
-Fixed factor levels have two characteristics: (1) they are not an obvious subset of a population
+**Fixed factor** levels have two characteristics: (1) they are not an obvious subset of a population
 of factor levels, and (2) the factor levels are informative, and are chosen by the investigator
 specifically because they have a unique and important meaning. Examples of fixed
 factor levels include:  
@@ -47,7 +47,7 @@ factor levels include:
  * Tree, grass, shrub, and so on
  * Particular variants on a predictor, for example, “high”, “medium”, and “low”  
  
-Random factor levels have two characteristics: (1) the selected factor levels often can be
+**Random factor** levels have two characteristics: (1) the selected factor levels often can be
 considered a subset from a population of possible levels, and (2) the factor levels are not informative.
 Because of these characteristics, we are unlikely to care about particular differences
 among factor levels. Random factor levels include:  
@@ -82,6 +82,7 @@ data(mosquito)
 ggplot(mosquito, aes(cage, length, colour = female)) + 
   geom_jitter(aes(fill=female), colour="black",pch=21, size=5, width = .05)
 ```
+
 This figure is confusing because of the way the data are coded; all numbers. We actually have 12 females total.
 We need a graph that makes sense before we can make some models.
 
@@ -97,7 +98,8 @@ ggplot(mosquito.recoded, aes(cage, length, colour = as.factor(female), shape=as.
   geom_jitter(width =0.15, size=5) +
   annotate("text", x = 2, y = 82.5, label = "12 females") +
   annotate("text", x = 2, y = 80, label = "2 measures per female") +
-  annotate("text", x = 2, y = 77.5, label = "24 total measurements", size=5, color="blue")
+  annotate("text", x = 2, y = 77.5, label = "24 total measurements", size=5, color="blue") +
+  geom_hline(yintercept = 66.63, linetype="dotted")
 ```
 
 ```{r random effects mosquito model and anova}
