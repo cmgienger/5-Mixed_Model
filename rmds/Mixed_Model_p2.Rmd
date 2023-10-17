@@ -106,11 +106,14 @@ ggplot(mosquito.recoded, aes(cage, length, colour = as.factor(female), shape=as.
 aedes.1 <- lmer(length ~ (1|cage/female), data = mosquito)
 anova(aedes.1)
 ```
-Its not happy, no fixed effects to evaluate, other than intercept of the model, which is the means of the measurements.
+Its not happy, no fixed effects to evaluate, other than intercept of the model,
+which is the mean of the wing measurements.
 
 ```{r mosquito model summary}
 summary(aedes.1)
 ```
+
+This model specification makes sense: "Number of obs: 24, groups:  female:cage, 12; cage, 3"
 
 Because the design is perfectly balanced, we can obtain the variance component estimates
 using mean squares from a conventional ANOVA. But this is confusing because df are different than what we might expect (there were only 12 mosquitos in the experiment).
@@ -185,6 +188,9 @@ rat.1
 ```{r}
 summary(rat.1)
 ```
+
+Look at how samples are parsed: "Number of obs: 36, groups:  liver:(rat:diet), 18; rat:diet, 6; diet, 3". This makes sense.
+
 ```{r}
 anova(rat.1)
 ```
