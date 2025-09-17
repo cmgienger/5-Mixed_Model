@@ -20,6 +20,10 @@ pk_to_install <- packages_needed [!( packages_needed %in% rownames(installed.pac
 if(length(pk_to_install)>0 ){
   install.packages(pk_to_install,repos="http://cran.r-project.org")
 }
+
+#flexplot is not on CRAN; install from Github.
+#devtools::install_github("dustinfife/flexplot")
+
 #lapply(packages_needed, require, character.only = TRUE)
 library(ggplot2)
 library(dplyr)
@@ -29,6 +33,7 @@ library(ggfortify)
 library(nlme)
 library(lme4)
 library(lmerTest)
+library(flexplot)
 ```
 Part Three: Random intercepts vs. random intercept and slope models (NOT COMPLETED)
 
@@ -45,15 +50,34 @@ sleepstudy
 ```{r plot sleep data}
 ggplot(data=sleepstudy, aes(Days, Reaction)) + 
   geom_point() +
-  stat_smooth(method="lm", se=FALSE) + facet_wrap(.~Subject, nrow = 2) +
+  stat_smooth(method="lm", se=FALSE) + 
+  facet_wrap(.~Subject, nrow = 2) +
   xlab("Days of Sleep Deprivation") +
   ylab("Average Reaction Time (ms)") +
   scale_x_continuous(breaks=seq(0, 9, 3))  # Ticks from 0-9, every 3
 ```
 ```{r fit and summarize mixed model}
-fm1 <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
+fm1 <- lmer(Reaction ~ Days + (Days | Subject), data=sleepstudy) # random intercepts and random slopes model
+fm2 <- lmer(Reaction ~ Days + (1 | Subject), data=sleepstudy) #random intercepts, same slopes
+
 summary(fm1)
 ```
 We are probably not intrinsically interested in comparing the different individuals that participated in the study.
 
 Continues on Bates p.31
+
+```{r make flexplot of model fm1, message=FALSE, warning=FALSE}
+flexplot::visualize(fm1, plot="model", sample=18) +
+  ggtitle("random intercepts-random slopes")
+```
+```{r make flexplot of model fm2, message=FALSE, warning=FALSE}
+flexplot::visualize(fm2, plot="model", sample=18) +
+  ggtitle("random intercepts-same slopes")
+```
+But notice that the fixed effects (the black line) is identical between the two models (compare model summaries for fm1 and fm2 to see identical intercepts and slopes for the fixed effects.
+Its only the random effects (study participants [Subjects]) that differ.
+```{r}
+flexplot::model.comparison(fm1, fm2)
+#fm1 seems to be better supported
+```
+

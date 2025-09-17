@@ -222,7 +222,7 @@ emmeans(mixed_machine, "machine", "person") #reverse the order of factors for al
 emmeans(mixed_machine, "person", "machine")
 ```
 
-OK, so lets look at the raw means vs. model-adjusted means (esimated marginal means)
+OK, so lets look at the raw means vs. model-adjusted means (estimated marginal means)
 
 ```{r emmeans as dataframe for use in plotting}
 data_emm <- as.data.frame(mixed_machine_emm)

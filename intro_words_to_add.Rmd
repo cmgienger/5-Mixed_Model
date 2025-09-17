@@ -1,0 +1,35 @@
+---
+title: "Syntax for Mixed Models"
+author: "CM Gienger"
+date: "2023-10-23"
+output: html_document
+---
+
+Good introduction to borrow for the Mixed Models module.
+
+<https://mspeekenbrink.github.io/sdam-r-companion/linear-mixed-effects-models.html#automatically-finding-optimal-random-effects-structures-with-the-buildmer-package>
+
+Including new thing on finding optimal random structure:
+
+<https://mspeekenbrink.github.io/sdam-r-companion/linear-mixed-effects-models.html#formulating-and-estimating-linear-mixed-effects-models-with-lme4>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r}
+
+```
+
+| **Formula** | **Description**                                                                                                   |
+|-----------------|-------------------------------------------------------|
+| `a + b`     | main effects of `a` and `b` (and no interaction)                                                                  |
+| `a:b`       | only interaction of `a` and `b` (and no main effects)                                                             |
+| `a * b`     | main effects and interaction of `a` and `b` (expands to: `a + b + a:b`)                                           |
+| `(a+b+c)^2` | main effects and two-way interactions, but no three-way interaction (expands to: `a + b + c + a:b + b:c + a:c`)   |
+| `(a+b)*c`   | all main effects and pairwise interactions between `c` and `a` or `b` (expands to: `a + b + c + a:c + b:c`)       |
+| `0 + a`     | `0` suppresses the intercept resulting in a model that has one parameter per level of `a` (identical to: `a - 1`) |
+|             |                                                                                                                   |
+
+: Examples of R's formula notation for fixed effects.

@@ -1,0 +1,36 @@
+---
+title: "lmer cheat sheet"
+author: "CM Gienger"
+date: "2024-10-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## lmer Syntax
+
+https://stats.stackexchange.com/questions/13166/rs-lmer-cheat-sheet
+
+https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html#model-definition
+
+The | symbol indicates a grouping factor in mixed methods.
+
+As per Pinheiro & Bates:
+
+...The formula also designates a response and, when available, a primary covariate. It is given as
+
+`response ~ primary | grouping`
+where response is an expression for the response, primary is an expression for the primary covariate, and grouping is an expression for the grouping (cluster) factor.
+
+For random factors, you have three basic variants:
+
+1. Intercepts only by random factor: `(1 | random.factor)`
+2. Slopes only by random factor: `(0 + fixed.factor | random.factor)`
+3. Intercepts and slopes by random factor: `(1 + fixed.factor | random.factor)`
+Note that variant 3 has the slope and the intercept calculated in the same grouping, i.e. at the same time. If we want the slope and the intercept calculated independently, i.e. without any assumed correlation between the two, we need a fourth variant:
+
+Intercept and slope, separately, by random factor: `(1 | random.factor) + (0 + fixed.factor | random.factor)`. An alternative way to write this is using the double-bar notation `fixed.factor + (fixed.factor || random.factor)`.
+
+`(X|Subject)` is the same as `(1+X|Subject)` -- like most formulae bits in R, the intercept is there unless you explicitly suppress it.
