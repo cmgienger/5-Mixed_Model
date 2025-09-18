@@ -19,7 +19,7 @@ The | symbol indicates a grouping factor in mixed methods.
 
 As per Pinheiro & Bates:
 
-...The formula also designates a response and, when available, a primary covariate. It is given as
+...The formula also designates a response and, when available, a primary covariate. It is given as:
 
 `response ~ primary | grouping`
 where response is an expression for the response, primary is an expression for the primary covariate, and grouping is an expression for the grouping (cluster) factor.
