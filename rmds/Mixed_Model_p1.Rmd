@@ -166,16 +166,27 @@ p1a<- ggplot(data, aes(x=machine, y=rating, group=person, color=person, shape=pe
        x= "Slot Machine", 
        y = "Yield/$100 played")
 
-#box plot of raw data; does not adjust for repeated measures of individuals
+#box plot of raw data by machine; does not adjust for repeated measures of individuals
 p1b <- ggplot(data, aes(x=machine, y=rating, color=machine)) + 
   geom_boxplot() +
   scale_y_continuous(labels=scales::dollar_format()) +
-  labs(title="The Bandit Gives Back: Rating Slot Machines",
-       subtitle = "Raw data; does not adjust for repeated measures of individuals",
+  theme(legend.position="none") +
+  labs(title="",
+       subtitle = "Raw data",
        x= "Slot Machine", 
        y = "Yield/$100 played")
 
-  p1a / p1b #uses library(patchwork) for plot organization)
+#box plot of raw data by person
+p1c <- ggplot(data, aes(x=person, y=rating, color=person)) + 
+  geom_boxplot() +
+  scale_y_continuous(labels=scales::dollar_format()) +
+  theme(legend.position="none") +
+  labs(title="",
+       subtitle = "Raw data",
+       x= "Person", 
+       y = "Yield/$100 played")
+
+  p1a / (p1b + p1c) #uses library(patchwork) for plot organization)
 ```
 
 <https://www.americancasinoguidebook.com/slot-machine-payback-statistics.html#Nevada>
