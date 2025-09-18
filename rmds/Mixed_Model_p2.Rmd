@@ -75,7 +75,7 @@ https://besjournals.onlinelibrary.wiley.com/doi/10.1111/j.2041-210x.2012.00251.x
 
 In a **nested design**, each level of the nested predictor is uniquely associated with only one level of the higher-level predictor.
 
-In a **crossed (or factorial) design**, at least one level of each predictor is associated with more than one level of the other predictors.
+In a **crossed (or factorial) design**, at least one level of each predictor is associated with more than one level of the other predictors. Crossed designs can further be separated into partially or fully crossed.
 
 This basic categorization of the study design does not depend on whether factors are fitted as fixed or random effects.
 

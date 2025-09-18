@@ -44,7 +44,7 @@ sys.source("../scripts/theme_cmg.R", envir = knitr::knit_global())
 
 Background: <https://www.youtube.com/watch?v=-4K-kKXNths>
 
-Up to this point our analyses have dealt mainly with just one or two explanatory variables, and for the most part these have been experimental treatments that have been deliberately applied in a particular way.
+Up to this point our analyses have dealt mainly with just one or two explanatory variables. For the most part these have been experimental treatments that have been deliberately applied in a particular way because we are interested in the treatment effects.
 These types of explanatory variables are often referred to as **fixed effects** (we fix the levels of the experimental treatments).
 
 However, there is often hierarchical structure in our data, such as with blocked designs.
@@ -200,7 +200,7 @@ machines_means
 ```
 
 ```{r fit mixed model for machines, message=FALSE, warning=FALSE}
-mixed_machine <- lmer(rating~(machine*person)+(1|person), data = data)
+mixed_machine <- lmer(rating ~ machine * person + (1|person), data = data)
 
 anova(mixed_machine) #notice it doesn't report whether whole model is significant or model fit, but we likely don't care anyway.
 ```
@@ -286,7 +286,7 @@ emmeans(mixed_machine, specs = pairwise ~ machine:person)
 \
 \
 ![](../images/coyote-fox.jpg){width="50%"}\
-[*The coyote-fox home range example "Animals" is an example of a mixed-model with perfectly balanced sample sizes. It describes the movement distances of the two species across each of the four seasons.*]{style="color:green"}
+[*The coyote-fox home range example "Animals" is an example of a mixed-model with perfectly balanced sample sizes. It describes the movement distances of three individuals of each of the two species across each of the four seasons.*]{style="color:green"}
 
 **Animals**
 
@@ -323,6 +323,8 @@ performance::check_model(mixed_animals) #analogous to autoplot, but for more com
 mixed_animals_emm <- emmeans(mixed_animals, "season", "species")
 mixed_animals_emm
 ```
+
+Lets get the summary data in one place for plotting a figure.
 
 ```{r emmeans as dataframe}
 data_emm <- as.data.frame(summary(mixed_animals_emm))
