@@ -5,6 +5,7 @@ output:
   html_document:
     toc: yes
 ---
+
 ```{r setup2, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 packages_needed <- c("ggplot2", # graphics
@@ -14,7 +15,8 @@ packages_needed <- c("ggplot2", # graphics
                      "ggfortify",
                      "nlme",
                      "lme4",
-                     "lmerTest"
+                     "lmerTest",
+                     "easystats"
                      )
 pk_to_install <- packages_needed [!( packages_needed %in% rownames(installed.packages())  )]
 if(length(pk_to_install)>0 ){
@@ -34,20 +36,28 @@ library(nlme)
 library(lme4)
 library(lmerTest)
 library(flexplot)
+library(easystats)
 ```
-Part Three: Random intercepts vs. random intercept and slope models (NOT COMPLETED)
+
+Part Three: Random intercepts vs. Random intercepts and slopes models
 
 **Sleep Example**
 
-Bates et al. "Fitting Linear Mixed-Effects Models Using lme4"
-https://cran.r-project.org/web/packages/lme4/vignettes/lmer.pdf
+Bates et al. "Fitting Linear Mixed-Effects Models Using lme4" <https://cran.r-project.org/web/packages/lme4/vignettes/lmer.pdf>
 
-Average reaction time per day for subjects in a sleep deprivation study (Belenkyet al.2003). On day 0 the subjects had their normal amount of sleep. Starting that night they were restricted to three hours of sleep per night for nine days. 
+Average reaction time per day for subjects in a sleep deprivation study (Belenky et al.2003). On day 0 the subjects had their normal amount of sleep. Starting that night they were restricted to three hours of sleep per night for nine days. Their reaction time was tested on each day.
+
+\
+
+![F1 driver taking reaction time test.](images/blazepod.jpg){width="600"}
+
+\
+
 ```{r sleep data}
 sleepstudy
 ```
 
-```{r plot sleep data}
+```{r plot sleep data, fig.width=10}
 ggplot(data=sleepstudy, aes(Days, Reaction)) + 
   geom_point() +
   stat_smooth(method="lm", se=FALSE) + 
@@ -56,28 +66,89 @@ ggplot(data=sleepstudy, aes(Days, Reaction)) +
   ylab("Average Reaction Time (ms)") +
   scale_x_continuous(breaks=seq(0, 9, 3))  # Ticks from 0-9, every 3
 ```
+
+We have a few different ways to fit a model that accounts for the variation among participants in the study, who were a random selection of people.
+
 ```{r fit and summarize mixed model}
 fm1 <- lmer(Reaction ~ Days + (Days | Subject), data=sleepstudy) # random intercepts and random slopes model
 fm2 <- lmer(Reaction ~ Days + (1 | Subject), data=sleepstudy) #random intercepts, same slopes
+```
 
+fm1 is considered a random slopes and random intercepts model because of the way the random effects are specified. This allows each subject to have a unique starting level (intercept) and a unique rate of change (slope) across days, with the variability estimated directly from the data.
+
+**1. Fixed Effects Portion**
+
+The term `Reaction ~ Days` specifies that the average (population-level) relationship between `Days` and `Reaction` will be estimated. This is the fixed effect part: a single overall intercept and a single overall slope for `Days` that apply across all subjects.
+
+**2. Random Effects Portion: `(Days | Subject)`**
+
+This part tells `lme4` that both the intercept and the slope for `Days` should be allowed to vary by `Subject`.
+
+The \| symbol means "grouping by".
+
+`Days | Subject` expands internally to two separate random effect terms:
+
+`(1 | Subject)` → a random intercept for each subject.
+
+`(0 + Days | Subject)` → a random slope for the effect of `Days` for each subject.
+
+**3. Visualization**
+
+If you plotted each subject’s regression line:
+
+**Random intercepts only:** All lines are parallel but vertically shifted.
+
+**Random slopes only:** All lines intersect at the same point but fan out at different angles.
+
+**Random intercepts and slopes:** Lines can vary in both height and tilt, looking like a messy "spaghetti plot".
+
+```{r}
 summary(fm1)
 ```
+
 We are probably not intrinsically interested in comparing the different individuals that participated in the study.
 
-Continues on Bates p.31
-
 ```{r make flexplot of model fm1, message=FALSE, warning=FALSE}
-flexplot::visualize(fm1, plot="model", sample=18) +
-  ggtitle("random intercepts-random slopes")
+flexplot::visualize(fm1, plot="model", sample=18) + #use all 18 of the measured individuals
+  ggtitle("fm1 - random intercepts-random slopes") +
+  labs(subtitle = "Formula: Reaction ~ Days + (Days | Subject)")
 ```
+
 ```{r make flexplot of model fm2, message=FALSE, warning=FALSE}
 flexplot::visualize(fm2, plot="model", sample=18) +
-  ggtitle("random intercepts-same slopes")
+  ggtitle("fm2 - random intercepts-same slopes") +
+  labs(subtitle = "Formula: Reaction ~ Days + (1 | Subject)")
 ```
-But notice that the fixed effects (the black line) is identical between the two models (compare model summaries for fm1 and fm2 to see identical intercepts and slopes for the fixed effects.
-Its only the random effects (study participants [Subjects]) that differ.
-```{r}
-flexplot::model.comparison(fm1, fm2)
-#fm1 seems to be better supported
+
+But notice that the fixed effects (the black line) is identical between the two models. Its only the random effects (study participants [Subjects]) that differ.
+
+Compare model summaries for fm1 and fm2 to see identical intercepts and slopes for the fixed effects.
+
+```{r coef fm1}
+arm::display(fm1)
 ```
+
+```{r coef fm2}
+arm::display(fm2)
+```
+
+Note that is is only the standard errors that differ in the fixed effects.
+The `paramaters` package has a function for abbreviated comparison of coefficients.
+
+```{r compare parameters}
+#parameters::compare_parameters(fm1, fm2)
+result <- parameters::compare_parameters(fm1, fm2, select = "{estimate}<br>({se})|{p}")
+print_html(result)
+```
+
+```{r compare performance, message=FALSE, warning=FALSE}
+performance::compare_performance(fm1, fm2)
+```
+
+Both models were statistically significant in their fixed effects (`Days`), and this was primarily what we were interested in. 
+
+In this case the more complex model (which costs more degrees of freedom to estimate model parameters) did a better job explaining the variation by removing random effects of individuals. The more complex model removed random effects of individuals by fitting a different intercept **and** different slope for each individual.
+
+As is often the case with complex models, we are not concerned only with statistical significance of our factor of interest (e.g. `Days`) but also by the overall explanatory power of the model. We will use this framework in our upcoming discussion of model selection.
+
 

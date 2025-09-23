@@ -4,7 +4,11 @@ subtitle: "Misc. Hierarchical Examples-Biodepth Example from Hector 2015"
 output:
   html_document:
     toc: yes
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
+
 ```{r setup2, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 packages_needed <- c("ggplot2", # graphics
@@ -32,45 +36,56 @@ library(lme4)
 library(lmerTest)
 library(asbio) # Aho 2014 example data
 ```
-**Examples of different types of hierarchical models** (Schielzeth and Nakagawa 2013, Methods in Ecology and Evolution)
-https://besjournals.onlinelibrary.wiley.com/doi/10.1111/j.2041-210x.2012.00251.x
+
+**Examples of different types of hierarchical models** (Schielzeth and
+Nakagawa 2013, Methods in Ecology and Evolution)
+
+<https://besjournals.onlinelibrary.wiley.com/doi/10.1111/j.2041-210x.2012.00251.x>
+
 \
 \
-![](../images/hierarchical_designs.jpg)
-**Biodepth Example**
+![](../images/hierarchical_designs.jpg) **Biodepth Example**
+
 ```{r}
 biodepth <- read.delim("../data/biodepth.txt", header=TRUE)
 ```
-The BIODEPTH (Biodiversity and Ecosystem Processes in Terrestrial Herbaceous Ecosystems)
-project manipulated levels of grassland plant diversity in field plots to simulate the
-impact of the loss of plant species on ecosystem processes.
 
-Source: Hector et al. 1999 Science ; Spehn et al. 2005 Ecological Monographs
-www.esapubs.org/archive/mono/M075/001
+The BIODEPTH (Biodiversity and Ecosystem Processes in Terrestrial
+Herbaceous Ecosystems) project manipulated levels of grassland plant
+diversity in field plots to simulate the impact of the loss of plant
+species on ecosystem processes.
+
+Source: Hector et al. 1999 Science ; Spehn et al. 2005 Ecological
+Monographs <https://www.esapubs.org/archive/mono/M075/001>
 
 **Aim: Effects of diversity on yield within 8 European grasslands**
 
-'data.frame':	480 obs. of  9 variables:
+'data.frame': 480 obs. of 9 variables:
 
-Plot      : Factor w/ 480 levels (field plots = experimental units)
+Plot : Factor w/ 480 levels (field plots = experimental units)
 
-Site      : Factor w/ 8 levels "Germany","Greece" (Fieldsites; **Random** grouping factor)
+Site : Factor w/ 8 levels "Germany","Greece" (Fieldsites; **Random**
+grouping factor)
 
-Block     : Factor w/ 15 levels (2 blocks per site except Portugal; **Random** grouping factor)
+Block : Factor w/ 15 levels (2 blocks per site except Portugal;
+**Random** grouping factor)
 
-Mix       : Factor w/ 200 levels (partially crossed species mixtures within sites)
+Mix : Factor w/ 200 levels (partially crossed species mixtures within
+sites)
 
-Mix_Nested: Factor w/ 220 levels (assuming full nesting of ecotypes within sites)
+Mix_Nested: Factor w/ 220 levels (assuming full nesting of ecotypes
+within sites)
 
-Diversity : No. of plant species per plot (primary explanatory variable (**Fixed** effect))
+Diversity : No. of plant species per plot (primary explanatory variable
+(**Fixed** effect))
 
-Shoot2    : Aboveground biomass harvested in year 2 (g m-2) [**Response**]
+Shoot2 : Aboveground biomass harvested in year 2 (g m-2) [**Response**]
 
-Shoot3    : Aboveground biomass harvested in year 3 (g m-2) [**Response**]
+Shoot3 : Aboveground biomass harvested in year 3 (g m-2) [**Response**]
 
 Diversity2: Diversity log transformed to base 2
 
-![](../images/biodepth.jpg){width=800px}
+![](../images/biodepth.jpg){width="800px"}
 
 ```{r convert and transform variables as needed}
 biodepth$Mix <- factor(biodepth$Mix)
@@ -81,126 +96,253 @@ biodepth$Diversity2 <- log(biodepth$Diversity,2)
 biodepth$Yield <- biodepth$Shoot2
 str(biodepth)
 ```
-```{r qplot of Yield vs number of species, message=FALSE, warning=FALSE}
+
+```{r qplot of Yield vs number of species, message=FALSE, warning=FALSE, fig.width=8}
 # Yield vs number of species for a 'no pooling analysis'
-qplot(Diversity, Yield, data= biodepth, geom= c("point", "smooth"), method= "lm",
-      xlab= "Number of species", ylab= "Yield", main= "No pooling analysis: Separated by Site (Country)",
-      facets=.~Site)+scale_x_continuous(trans= "log2")+theme_bw()
+
+ggplot(biodepth, aes(x = Diversity, y = Yield)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  facet_wrap(~Site) +
+  labs(
+    x = "Number of species",
+    y = "Yield",
+    title = "No pooling analysis: Separated by Site (Country)"
+  ) +
+  scale_x_continuous(trans = "log2") +
+  theme_bw()
 ```
 
-Note that the x-axis in the plots are log transformed because
-in general this produces approximately linear relationships (productivity
-cannot increase without limit, leading us to expect declining returns with
-increasing diversity which will be roughly linear once diversity is logged).
+Note that the x-axis in the plots are log transformed because in general
+this produces approximately linear relationships (productivity cannot
+increase without limit, leading us to expect declining returns with
+increasing diversity which will be roughly linear once diversity is
+logged).
 
-As is typical of ecological data there is plenty of variability, but
-in general there **seems to be a positive relationship between the hay yield
-of the experimental grassland plots and the number of species they were
-sown with**. Intercepts vary as well, indicating that sites have different levels of
-productivity (due to soil, climate etc).
+As is typical of ecological data there is plenty of variability, but in
+general there **seems to be a positive relationship between the hay
+yield of the experimental grassland plots and the number of species they
+were sown with**. Intercepts vary as well, indicating that sites have
+different levels of productivity (due to soil, climate etc).
 
 The point of fitting this model here is to help us understand the
 mixed-effects analysis we want to build from these initial simple
-extremes. One way to think of the mixed-effects analysis is as a **compromise
-between the no-pooling and complete-pooling models**.  
+extremes. One way to think of the mixed-effects analysis is as a
+**compromise between the no-pooling and complete-pooling models**.
 
-Before we begin the mixed-effects analysis there is one more fixed-effects model we
-should fit.
-```{r message=FALSE, warning=FALSE}
-qplot(Diversity, Yield, data= biodepth, 
-      geom= c("point", "smooth"), method= "lm", main= "Complete pooling analysis: All sites combined",
-      xlab= "Number of species", ylab= "Yield")+scale_x_continuous(trans= "log2")+theme_bw()
+Before we begin the mixed-effects analysis there is one more
+fixed-effects model we should fit.
+
+```{r Complete pooling analysis, message=FALSE, warning=FALSE}
+ggplot(biodepth, aes(x = Diversity, y = Yield)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(
+    title = "Complete pooling analysis: All sites combined",
+    x = "Number of species",
+    y = "Yield"
+  ) +
+  scale_x_continuous(trans = "log2") +
+  theme_bw()
 ```
 
 Notice that by pooling the data, all the hierarchical structure is lost.
 
 **Mixed-model ANOVA using normal least squares**
 
-Prior to the relatively recent introduction of modern mixed-effects models, a typical ecological analysis might well have consisted of fitting separate relationships for each site. However, we could also consider a normal least squares analysis using the `lm()` function that includes diversity, site, and the interaction. This is similar to an ANCOVA model:
+Prior to the relatively recent introduction of modern mixed-effects
+models, a typical ecological analysis might well have consisted of
+fitting separate relationships for each site. However, we could also
+consider a normal least squares analysis using the `lm()` function that
+includes diversity, site, and the interaction. This is similar to an
+ANCOVA model:
+
 ```{r ordinary least squares model}
 ls0 <- lm(Yield ~ Site + Diversity2 + Site:Diversity2, data=biodepth)
 ```
-This model ignores the fact that the design is **blocked within sites**, and that the experiment also looks at the effects of species composition by replicating each species that is grown in monoculture and each mixture of species grown in polyculture (the factor Mix with 200 levels). To include these factors we have to extend from an ANCOVA to a more complex general linear model with several explanatory variables and nuisance terms.
+
+This model ignores the fact that the design is **blocked within sites**,
+and that the experiment also looks at the effects of species composition
+by replicating each species that is grown in monoculture and each
+mixture of species grown in polyculture (the factor Mix with 200
+levels). To include these factors we have to extend from an ANCOVA to a
+more complex general linear model with several explanatory variables and
+nuisance terms.
+
 ```{r show combinations of variables, message=FALSE, warning=FALSE}
 CH <- subset(biodepth, Site=="Switzerland")
+
 # Reorder by levels of diversity
 CH[order( factor(CH$Diversity) ), ]
+
 # create colour and shape combinations to specify 32 mixtures
 cols <- rep(c('black','red','green4','blue'), each = 8)
 shapes <- rep(c(1:8),4)
-FigTen3 <- qplot(Diversity, Yield, data= CH, geom= c("point"),
-                 xlab= "Number of species", ylab= "Yield", main= "Example from Switzerland; note 32 combinations of mixtures",
-                 facets=.~Block, colour=Mix, shape=Mix)+
-                 scale_x_continuous(trans= "log2")+theme_bw()
-FigTen3 + theme(legend.position="none") + scale_colour_manual(values=cols) + scale_shape_manual(values=shapes)
+
+FigTen3 <- ggplot(CH, aes(x = Diversity, y = Yield, color = Mix, shape = Mix)) +
+  geom_point() +
+  facet_wrap(~Block) +
+  labs(
+    x = "Number of species",
+    y = "Yield",
+    title = "Example from Switzerland; note 32 combinations of mixtures"
+  ) +
+  scale_x_continuous(trans = "log2") +
+  theme_bw()
+
+# Add theme, custom colors, and shapes
+FigTen3 +
+  theme(legend.position = "none") +
+  scale_colour_manual(values = cols) +
+  scale_shape_manual(values = shapes)
 ```
 
-The BIODEPTH experimental design at one example field site (Switzerland). At each site the regression of yield on diversity is repeated in two blocks (D and E). To separate the effects of species number (diversity) and species composition, replicate communities within each diversity level have different species composition. Each species composition (monoculture or polyculture) occurs once within each block so that both species richness and composition are replicated.
+The BIODEPTH experimental design at one example field site
+(Switzerland). At each site the regression of yield on diversity is
+repeated in two blocks (D and E). To separate the effects of species
+number (diversity) and species composition, replicate communities within
+each diversity level have different species composition. Each species
+composition (monoculture or polyculture) occurs once within each block
+so that both species richness and composition are replicated.
+
 ```{r}
 ls1 <- lm(terms(Yield~Site+Block+Diversity2+Site:Diversity2+Mix+Site:Mix, keep.order= TRUE), data= biodepth)
 ```
-This type of complex **normal least squares analysis** with a combination of fixed and random effects is often called **mixed-model ANOVA**. The R code is unfortunately complex: we need the `terms()` function to specify the order in which the SS are calculated to be the same as the order of terms in the model sequence (otherwise R would put all the main effects first, then the two-way interactions, and so on, which does not work with this design since the diversity effects are a subset of the mixture effects—as you will see if you try fitting the mixture terms before the diversity terms).
+
+This type of complex **normal least squares analysis** with a
+combination of fixed and random effects is often called **mixed-model
+ANOVA**. The R code is unfortunately complex: we need the `terms()`
+function to specify the order in which the SS are calculated to be the
+same as the order of terms in the model sequence (otherwise R would put
+all the main effects first, then the two-way interactions, and so on,
+which does not work with this design since the diversity effects are a
+subset of the mixture effects—as you will see if you try fitting the
+mixture terms before the diversity terms).
+
 ```{r fit model via least-squares}
 anova(ls1)
 ```
-Unfortunately, the P-values for models fitted using the `lm()` function are produced by dividing the mean squares for each term by the residual mean square in the final row. However, because of the complexity of the design our analysis has multiple levels, and different levels have different error terms. Some of the F- and P-values in the `summary()` output given here are therefore tested against inappropriate error terms and cannot be trusted.
 
-One of the key messages is that it is normally better to focus on the estimates and intervals rather than the P-values (because what does it really mean when everything is 'significant'?).
-Another take home message is that trying to do complex mixed-model analysis within the least squares framework is fraught with difficulties and limitations and it is **better to adopt the modern maximum likelihood-based approach** to mixed-effects models.
+Unfortunately, the P-values for models fitted using the `lm()` function
+are produced by dividing the mean squares for each term by the residual
+mean square in the final row. However, because of the complexity of the
+design our analysis has multiple levels, and different levels have
+different error terms. Some of the F- and P-values in the `summary()`
+output given here are therefore tested against inappropriate error terms
+and cannot be trusted.
+
+One of the key messages is that it is normally better to focus on the
+estimates and intervals rather than the P-values (because what does it
+really mean when everything is 'significant'?). Another take home
+message is that trying to do complex mixed-model analysis within the
+least squares framework is fraught with difficulties and limitations and
+it is **better to adopt the modern maximum likelihood-based approach**
+to mixed-effects models.
 
 **Maximum likelihood-based mixed-effects models in R**
 
-Start by fitting a model that doesn't consider any interactions (keep it simple initially). We are analysing the response, yield, as a function of the fixed effect of diversity (using the log2 transformed version again) with simple random effects for sites, blocks, and mixtures. We will examine the way we specify the random effects in greater detail later but the key point to understand is that the `lme()` function **can only deal with nested random effects** as indicated by the forward slashes between site, block, and mix.
+Start by fitting a model that doesn't consider any interactions (keep it
+simple initially). We are analysing the response, yield, as a function
+of the fixed effect of diversity (using the log2 transformed version
+again) with simple random effects for sites, blocks, and mixtures. We
+will examine the way we specify the random effects in greater detail
+later but the key point to understand is that the `lme()` function **can
+only deal with nested random effects** as indicated by the forward
+slashes between site, block, and mix.
 
-Example of Russian Dolls 'Nested' Within One Another; Analogous to Nested Effects in Model Specification
-![Russian Doll](../images/RussianDoll.jpg){width=400px}
+Example of Russian Dolls 'Nested' Within One Another; Analogous to
+Nested Effects in Model Specification ![Russian
+Doll](../images/RussianDoll.jpg){width="400px"}
+
 ```{r}
 library(nlme)
 mem1 <- lme(Yield~Diversity2, random= ~1|Site/Block/Mix, na.action= na.exclude, data= biodepth)
 summary(mem1)
 ```
-Things start well—8 sites and 15 blocks are both correct—but `lme()` fails to correctly pick out the factor
-for the mixtures (with 200 levels) and instead reports 429 groups! This is because the random effects in this analysis are not fully nested but are partially crossed.
 
-Understanding the difference between nested and crossed random effects is critical. First, `lme()` is really set up to deal only with fully nested designs, so if we want to use `lme()` we must be sure we have only nested random effects. Secondly, the newer `lme4` package can handle both nested and crossed random effects, which means that we must correctly specify them by coding them appropriately in the dataframe.
+Things start well—8 sites and 15 blocks are both correct—but `lme()`
+fails to correctly pick out the factor for the mixtures (with 200
+levels) and instead reports 429 groups! This is because the random
+effects in this analysis are not fully nested but are partially crossed.
 
-Whether random effects are nested or crossed is a property of the data, not the model. However, when fitting the model, effects can be included as either nested or crossed.
+Understanding the difference between nested and crossed random effects
+is critical. First, `lme()` is really set up to deal only with fully
+nested designs, so if we want to use `lme()` we must be sure we have
+only nested random effects. Secondly, the newer `lme4` package can
+handle both nested and crossed random effects, which means that we must
+correctly specify them by coding them appropriately in the dataframe.
 
-**Nested random effects** are when each member of one group is contained entirely within a single unit of another group. The canonical example is students in classrooms; you may have repeated measures per student, but each student belongs to a single classroom (assuming no reassignments).
+Whether random effects are nested or crossed is a property of the data,
+not the model. However, when fitting the model, effects can be included
+as either nested or crossed.
 
-**Crossed random effects** are when this nesting is not true. An example would be different seeds and different fields used for planting crops. Seeds of the same type can be planted in different fields, and each field can have multiple seeds in it.
+**Nested random effects** are when each member of one group is contained
+entirely within a single unit of another group. The canonical example is
+students in classrooms; you may have repeated measures per student, but
+each student belongs to a single classroom (assuming no reassignments).
+
+**Crossed random effects** are when this nesting is not true. An example
+would be different seeds and different fields used for planting crops.
+Seeds of the same type can be planted in different fields, and each
+field can have multiple seeds in it.
 
 ![](../images/nested_crossed.jpeg)
 
-If each mixture occurred in only one block then the design would be fully nested. If every mixture was replicated in every block then the design would be fully crossed. In fact what we have is something in between that looks like the bottom panel. Mixtures in the BIODEPTH design are mostly nested within blocks but some do reoccur in different blocks introducing partial crossing.
+If each mixture occurred in only one block then the design would be
+fully nested. If every mixture was replicated in every block then the
+design would be fully crossed. In fact what we have is something in
+between that looks like the bottom panel. Mixtures in the BIODEPTH
+design are mostly nested within blocks but some do reoccur in different
+blocks introducing partial crossing.
 
-In order to deal with designs with crossed random effects we have to use the `lmer()` function from the `lme4` package instead. The `lme4` package also contains the `lmList()` function that will fit an `lm()` model within each group—site in this case:
+In order to deal with designs with crossed random effects we have to use
+the `lmer()` function from the `lme4` package instead. The `lme4`
+package also contains the `lmList()` function that will fit an `lm()`
+model within each group—site in this case:
+
 ```{r}
 detach(package: nlme) # to avoid potential conflicts with lme4
 library(lme4)
 lmList(Yield~Diversity2|Site, data= biodepth)
 ```
-Check these values against the multi-panel figure above (Yield~Number of Species).
 
-The model-building approach recommends starting with a model that is as complex or slightly more complex than we
-anticipate we will need. We can then consider whether or not to simplify this model. In this case we could begin with a model including interactions for both the site-by-diversity and site-by-mixture terms (the crossed random effects).
+Check these values against the multi-panel figure above (Yield\~Number
+of Species).
 
-The site-by-diversity interaction in the random effects allows variation among sites in the regression intercepts and slopes and is sometimes called a **random intercepts and slopes model** (as opposed to one with random intercepts only where the slopes are fixed to be parallel at different sites). Helpfully, the syntax for fitting mixed-effects models in `lmer()` has been simplified relative to `lme()`:
+The model-building approach recommends starting with a model that is as
+complex or slightly more complex than we anticipate we will need. We can
+then consider whether or not to simplify this model. In this case we
+could begin with a model including interactions for both the
+site-by-diversity and site-by-mixture terms (the crossed random
+effects).
+
+The site-by-diversity interaction in the random effects allows variation
+among sites in the regression intercepts and slopes and is sometimes
+called a **random intercepts and slopes model** (as opposed to one with
+random intercepts only where the slopes are fixed to be parallel at
+different sites). Helpfully, the syntax for fitting mixed-effects models
+in `lmer()` has been simplified relative to `lme()`:
 
 ```{r}
 mer1 <- lmer(Yield~Diversity2 +(1+Diversity2|Site)+(1|Block)+(1|Mix)+(1|Site:Mix), data= biodepth)
 summary(mer1)
 ```
-As before, a good place to start is at the bottom of the `summary()` or `display()`
-function output to check whether the structure has been understood.
-The newer function properly identifies the number of sites, blocks,
-and mixtures (the number of groups for mixtures is given as 198 not 200,
-due to missing values).
+
+As before, a good place to start is at the bottom of the `summary()` or
+`display()` function output to check whether the structure has been
+understood. The newer function properly identifies the number of sites,
+blocks, and mixtures (the number of groups for mixtures is given as 198
+not 200, due to missing values).
 
 ##Likelihood ratio tests of random effects
 
-In model-building, we would normally want to keep the main effects for sites, blocks, and mixtures since
-they reflect the core structure of the design, but we could consider whether or not to include the interaction terms. The recommended approach is to remove one term at a time from the random effects and to judge whether to retain it or not using a likelihood ratio test to compare the model with and without the effect in question (considering only one effect at a time).
+In model-building, we would normally want to keep the main effects for
+sites, blocks, and mixtures since they reflect the core structure of the
+design, but we could consider whether or not to include the interaction
+terms. The recommended approach is to remove one term at a time from the
+random effects and to judge whether to retain it or not using a
+likelihood ratio test to compare the model with and without the effect
+in question (considering only one effect at a time).
 
 Note that these are 'nested models'!
 
@@ -209,12 +351,29 @@ mer1 <- lmer(Yield~Diversity2 +(1+Diversity2|Site)+(1|Block)+(1|Mix)+(1|Site:Mix
 mer2 <- lmer(Yield~Diversity2 +(1+Diversity2|Site)+(1|Block)+(1|Mix), data= biodepth)
 anova(mer1, mer2)
 ```
-Because likelihood ratio tests are recommended for assessing random effects we shall postpone discussion of the AIC and the Bayesian information criterion (BIC) until later. The difference between the simpler and more complex model—that is the interaction in question—is highly significant by the chi-square value produced by the likelihood ratio test.
 
-Following this approach we will keep the site-by-mixture interaction in the random effects. Although we would normally retain the random effect for block in the model to reflect its role in the design we can test its importance here as a demonstration of how optional terms could be removed from the random effects:
+Because likelihood ratio tests are recommended for assessing random
+effects we shall postpone discussion of the AIC and the Bayesian
+information criterion (BIC) until later. The difference between the
+simpler and more complex model—that is the interaction in question—is
+highly significant by the chi-square value produced by the likelihood
+ratio test.
+
+Following this approach we will keep the site-by-mixture interaction in
+the random effects. Although we would normally retain the random effect
+for block in the model to reflect its role in the design we can test its
+importance here as a demonstration of how optional terms could be
+removed from the random effects:
+
 ```{r message=FALSE, warning=FALSE}
 mer3 <- lmer(Yield~Diversity2 +(1+Diversity2|Site)+(1|Mix)+(1|Site:Mix), data= biodepth)
 anova(mer1, mer3)
 ```
-In contrast to the previous test, in this case the effect of block is nonsignificant. However, we shouldn’t let the tail wag the dog and we will retain the block effect as a basic component of the experimental design. So while the approach based on null hypothesis significance testing and P-values is slightly at odds with the estimation-based analysis recommended, we will let the general considerations drive our
+
+In contrast to the previous test, in this case the effect of block is
+nonsignificant. However, we shouldn’t let the tail wag the dog and we
+will retain the block effect as a basic component of the experimental
+design. So while the approach based on null hypothesis significance
+testing and P-values is slightly at odds with the estimation-based
+analysis recommended, we will let the general considerations drive our
 model selection and not blindly follow the P-values.
