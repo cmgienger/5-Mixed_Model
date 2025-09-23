@@ -49,7 +49,7 @@ Average reaction time (ms) per day for subjects in a sleep deprivation study (Be
 
 \
 
-![F1 driver taking reaction time test.](images/blazepod.jpg){width="600"}
+![F1 driver taking reaction time test.](../images/blazepod.jpg){width="600"}
 
 \
 

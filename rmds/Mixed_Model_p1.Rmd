@@ -25,6 +25,10 @@ pk_to_install <- packages_needed [!( packages_needed %in% rownames(installed.pac
 if(length(pk_to_install)>0 ){
   install.packages(pk_to_install,repos="http://cran.r-project.org")
 }
+
+#flexplot is not on CRAN; install from Github.
+#devtools::install_github("dustinfife/flexplot")
+
 #lapply(packages_needed, require, character.only = TRUE)
 library(ggplot2)
 library(dplyr)
@@ -38,6 +42,7 @@ library(emmeans)
 library(ggtext)
 library(patchwork)
 library(easystats) #plot group-level scores of mixed models
+library(flexplot)
 
 sys.source("../scripts/theme_cmg.R", envir = knitr::knit_global())
 ```
@@ -269,6 +274,13 @@ p2
 ```
 
 Raw means are not all that different from model-adjusted means (emmeans), but does change the inference slightly.
+
+```{r}
+fp1 <- flexplot::visualize(mixed_machine, plot="model", sample=6) +
+  ggtitle("Marginal Means (black) and Individual Means (colors)")
+fp1
+```
+
 
 ```{r pairwise contrasts BETWEEN machines}
 pairs(emmeans(mixed_machine, "machine")) 
