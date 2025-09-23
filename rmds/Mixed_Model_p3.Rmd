@@ -80,7 +80,7 @@ fm1 is considered a random slopes and random intercepts model because of the way
 
 The term `Reaction ~ Days` specifies that the average (population-level) relationship between `Days` and `Reaction` will be estimated. This is the fixed effect part: a single overall intercept and a single overall slope for `Days` that apply across all subjects.
 
-**2. Random Effects Portion: `(Days | Subject)`**
+**2. Random Effects Portion `(Days | Subject)`**
 
 This part tells `lme4` that both the intercept and the slope for `Days` should be allowed to vary by `Subject`.
 
@@ -88,9 +88,9 @@ The \| symbol means "grouping by".
 
 `Days | Subject` expands internally to two separate random effect terms:
 
-`(1 | Subject)` → a random intercept for each subject.
+-  `(1 | Subject)` → a random intercept for each subject.
 
-`(0 + Days | Subject)` → a random slope for the effect of `Days` for each subject.
+-  `(0 + Days | Subject)` → a random slope for the effect of `Days` for each subject.
 
 **3. Visualization**
 
