@@ -45,7 +45,7 @@ Part Three: Random intercepts vs. Random intercepts and slopes models
 
 Bates et al. "Fitting Linear Mixed-Effects Models Using lme4" <https://cran.r-project.org/web/packages/lme4/vignettes/lmer.pdf>
 
-Average reaction time per day for subjects in a sleep deprivation study (Belenky et al.2003). On day 0 the subjects had their normal amount of sleep. Starting that night they were restricted to three hours of sleep per night for nine days. Their reaction time was tested on each day.
+Average reaction time (ms) per day for subjects in a sleep deprivation study (Belenky et al.2003). On day 0 the subjects had their normal amount of sleep. Starting that night they were restricted to three hours of sleep per night for nine days. Their reaction time was tested on each day.
 
 \
 

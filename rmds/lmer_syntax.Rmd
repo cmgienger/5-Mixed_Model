@@ -1,7 +1,7 @@
 ---
 title: "lmer cheat sheet"
 author: "CM Gienger"
-date: "`r Sys.Date()`"
+date: c
 output: html_document
 ---
 
