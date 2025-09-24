@@ -98,15 +98,25 @@ If you plotted each subject’s regression line:
 
 **Random intercepts only:** All lines are parallel but vertically shifted.
 
-**Random slopes only:** All lines intersect at the same point but fan out at different angles.
+**Random slopes only:** All lines intersect at the same point but fan out at different angles. (not commonly used in ecological models) 
 
 **Random intercepts and slopes:** Lines can vary in both height and tilt, looking like a messy "spaghetti plot".
 
-```{r}
+```{r summary fm1}
 summary(fm1)
 ```
 
-We are probably not intrinsically interested in comparing the different individuals that participated in the study.
+```{r summary fm2}
+summary(fm2)
+```
+
+Here the df column represents the *approximate* degrees of freedom left over for testing each fixed effect. It is adjusted downward for hierarchical structure and estimation of random effects. A different df is computed for each fixed effect, depending on how much information is available for that predictor.
+
+Interpretation: **The df reported are leftover, not used**. They represent how much information remains to estimate variability around that particular fixed effect.
+
+Analogy: Think of df as a "budget of information". Fixed effects and random effects estimation "spend" some of this budget. What’s left over is reported in `summary()` for each fixed effect. The df reported are like the balance remaining in your account, not the total amount you've already spent. (see the handout in the "resources" folder in this repository for more detailed information)
+
+We are probably not intrinsically interested in comparing the different individuals that participated in the study, but its good to visualize how individuals (random effect) contribute to the fixed effect (Days). The fixed effect regression line is essentially an average of the random effects (individuals). Because the data do not change when fitting models with different random effects (only the models change), the fixed effects are the same among models with differently specified random effects.
 
 ```{r make flexplot of model fm1, message=FALSE, warning=FALSE}
 flexplot::visualize(fm1, plot="model", sample=18) + #use all 18 of the measured individuals
